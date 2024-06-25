@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 
-require b from git "../b"
+require b from git "https://github.com/KislyjKisel/mwe-require-externlib2"
 
 package «a» where
 
