@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 
-require b from git "https://github.com/KislyjKisel/mwe-require-externlib2" @ "465ab21"
+require b from git "https://github.com/KislyjKisel/mwe-require-externlib2" @ "6e098b4"
 
 package «a» where
 
@@ -11,13 +11,17 @@ lean_lib «A» where
 lean_exe «a» where
   root := `Main
 
-target ffi.o pkg : FilePath := do
-  let oFile := pkg.buildDir / "c" / "ffi.o"
-  let srcJob <- inputFile <| pkg.dir / "ffi.c"
+input_file ffi_static.c where
+  path := "ffi.c"
+  text := true
+
+target ffi.o pkg : System.FilePath := do
+  let srcJob ← ffi_static.c.fetch
+  let oFile := pkg.buildDir / "c" / "ffi_static.o"
   let weakArgs := #["-I", (<- getLeanIncludeDir).toString]
-  buildO oFile srcJob weakArgs #["-fPIC"] "cc" getLeanTrace
+  buildO oFile srcJob weakArgs #["-fPIC"] "cc"
 
 extern_lib libleanffia pkg := do
   let ffiO <- ffi.o.fetch
   let name := nameToStaticLib "leanffia"
-  buildStaticLib (pkg.nativeLibDir / name) #[ffiO]
+  buildStaticLib (pkg.staticLibDir / name) #[ffiO]
